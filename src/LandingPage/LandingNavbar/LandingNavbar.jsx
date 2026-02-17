@@ -4,7 +4,7 @@ import { Link } from "react-router-dom";
 const LandingNavbar = () => {
   return (
     <nav className="sticky top-0 z-50 bg-white/95 backdrop-blur-md border-b-4 border-[#FCD34D] shadow-sm">
-      <div className="max-w-7xl mx-auto px-6 py-4">
+      <div className="max-w-7xl mx-auto  py-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
             <img
@@ -41,9 +41,17 @@ const LandingNavbar = () => {
               Login
             </a> */}
             <Link
-              to="/login"
+              to="/login/admin"
               className="bg-[#DC2626] text-white hover:bg-[#B91C1C] px-6 py-2.5 rounded-lg font-semibold transition-all shadow-md hover:shadow-lg"
-            >Login</Link>
+            >
+              Login
+            </Link>
+            <Link
+              to="/login/student"
+              className="bg-[#DC2626] text-white hover:bg-[#B91C1C] px-6 py-2.5 rounded-lg font-semibold transition-all shadow-md hover:shadow-lg"
+            >
+              Student Login
+            </Link>
           </div>
           <button className="md:hidden p-2 hover:bg-gray-100 rounded-lg transition-colors">
             <svg
@@ -53,9 +61,9 @@ const LandingNavbar = () => {
               viewBox="0 0 24 24"
               fill="none"
               stroke="currentColor"
-              stroke-width="2"
-              stroke-linecap="round"
-              stroke-linejoin="round"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
               className="lucide lucide-menu"
               aria-hidden="true"
             >

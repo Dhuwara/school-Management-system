@@ -1,7 +1,18 @@
-import React from 'react'
-import { Link } from 'react-router-dom'
+import React,{useState} from 'react'
+import {  useParams } from "react-router-dom";
+import { useForm } from 'react-hook-form'
 
 const Login = () => {
+  const {role} = useParams()
+  const onSubmit = (data)=>{
+    console.log(data);
+  }
+  const {register,handleSubmit, formState:{errors},} = useForm()
+  const [isEye, setIsEye] = useState(false)
+  const handlePassword = () => {
+    setIsEye((prev) => !prev);
+  };
+
   return (
     <div className="min-h-screen flex">
       <div className="hidden lg:flex lg:w-1/2 bg-[#4F46E5] items-center justify-center p-12">
@@ -14,9 +25,9 @@ const Login = () => {
               viewBox="0 0 24 24"
               fill="none"
               stroke="currentColor"
-              stroke-width="2"
-              stroke-linecap="round"
-              stroke-linejoin="round"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
               className="lucide lucide-graduation-cap"
               aria-hidden="true"
             >
@@ -66,45 +77,168 @@ const Login = () => {
               </p>
             </div>
 
-            <form className="space-y-4">
-              <div>
-                <label
-                  for="username"
-                  className="block text-sm font-medium text-[#0F172A] mb-2"
-                >
-                  Username
-                </label>
-                <input
-                  id="username"
-                  data-testid="username-input"
-                  required
-                  type="text"
-                  placeholder="Enter username"
-                  className="w-full h-10 px-3 py-2 border border-slate-200 rounded-lg
+            <form className="space-y-4" onSubmit={handleSubmit(onSubmit)}>
+              {role === "student" ? (
+                <>
+                  <div>
+                    <label
+                      htmlFor="rollnumber"
+                      className="block text-sm font-medium text-[#0F172A] mb-2"
+                    >
+                      Roll Number
+                    </label>
+                    <input
+                      id="rollnumber"
+                      type="text"
+                      placeholder="Enter rollnumber"
+                      className="w-full h-10 px-3 py-2 border border-slate-200 rounded-lg
                      focus:outline-none focus:ring-2 focus:ring-[#4F46E5]
                      focus:ring-offset-2 transition-all"
-                />
-              </div>
+                      {...register("rollnumber", {
+                        required: "rollnumber is required",
+                      })}
+                    />
+                    {errors.rollnumber && (
+                      <p className="text-red-400">*rollnumber is required</p>
+                    )}
+                  </div>
 
-              <div>
-                <label
-                  for="password"
-                  className="block text-sm font-medium text-[#0F172A] mb-2"
-                >
-                  Password
-                </label>
-                <input
-                  id="password"
-                  data-testid="password-input"
-                  required
-                  type="password"
-                  placeholder="••••••••"
-                  className="w-full h-10 px-3 py-2 border border-slate-200 rounded-lg
+                  <div className="relative">
+                    <label
+                      htmlFor="password"
+                      className="block text-sm font-medium text-[#0F172A] mb-2"
+                    >
+                      Password
+                    </label>
+                    <input
+                      id="password"
+                      type={isEye ? "text" : "password"}
+                      className="w-full h-10 px-3 py-2 border border-slate-200 rounded-lg
                      focus:outline-none focus:ring-2 focus:ring-[#4F46E5]
                      focus:ring-offset-2 transition-all"
-                />
-              </div>
+                      {...register("password", {
+                        required: "Password is required",
+                      })}
+                    />
+                    {errors.password && (
+                      <p className="text-red-400">*password is required</p>
+                    )}
+                    {isEye ? (
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        strokeWidth={1.5}
+                        stroke="currentColor"
+                        className="size-6 absolute bottom-2 right-1 cursor-pointer"
+                        onClick={handlePassword}
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          d="M13.5 10.5V6.75a4.5 4.5 0 1 1 9 0v3.75M3.75 21.75h10.5a2.25 2.25 0 0 0 2.25-2.25v-6.75a2.25 2.25 0 0 0-2.25-2.25H3.75a2.25 2.25 0 0 0-2.25 2.25v6.75a2.25 2.25 0 0 0 2.25 2.25Z"
+                        />
+                      </svg>
+                    ) : (
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        strokeWidth={1.5}
+                        stroke="currentColor"
+                        className="size-6 absolute bottom-2 right-1 cursor-pointer"
+                        onClick={handlePassword}
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          d="M16.5 10.5V6.75a4.5 4.5 0 1 0-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 0 0 2.25-2.25v-6.75a2.25 2.25 0 0 0-2.25-2.25H6.75a2.25 2.25 0 0 0-2.25 2.25v6.75a2.25 2.25 0 0 0 2.25 2.25Z"
+                        />
+                      </svg>
+                    )}
+                  </div>
+                </>
+              ) : (
+                <>
+                  <div>
+                    <label
+                      htmlFor="username"
+                      className="block text-sm font-medium text-[#0F172A] mb-2"
+                    >
+                      Username
+                    </label>
+                    <input
+                      id="username"
+                      type="text"
+                      placeholder="Enter username"
+                      className="w-full h-10 px-3 py-2 border border-slate-200 rounded-lg
+                     focus:outline-none focus:ring-2 focus:ring-[#4F46E5]
+                     focus:ring-offset-2 transition-all"
+                      {...register("username", {
+                        required: "username is required",
+                      })}
+                    />
+                    {errors.username && (
+                      <p className="text-red-400">*Username is required</p>
+                    )}
+                  </div>
 
+                  <div className="relative">
+                    <label
+                      htmlFor="password"
+                      className="block text-sm font-medium text-[#0F172A] mb-2"
+                    >
+                      Password
+                    </label>
+                    <input
+                      id="password"
+                      type={isEye ? "text" : "password"}
+                      className="w-full h-10 px-3 py-2 border border-slate-200 rounded-lg
+                     focus:outline-none focus:ring-2 focus:ring-[#4F46E5]
+                     focus:ring-offset-2 transition-all"
+                      {...register("password", {
+                        required: "Password is required",
+                      })}
+                    />
+                    {errors.password && (
+                      <p className="text-red-400">*password is required</p>
+                    )}
+                    {isEye ? (
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        strokeWidth={1.5}
+                        stroke="currentColor"
+                        className="size-6 absolute bottom-2 right-1 cursor-pointer"
+                        onClick={handlePassword}
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          d="M13.5 10.5V6.75a4.5 4.5 0 1 1 9 0v3.75M3.75 21.75h10.5a2.25 2.25 0 0 0 2.25-2.25v-6.75a2.25 2.25 0 0 0-2.25-2.25H3.75a2.25 2.25 0 0 0-2.25 2.25v6.75a2.25 2.25 0 0 0 2.25 2.25Z"
+                        />
+                      </svg>
+                    ) : (
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        strokeWidth={1.5}
+                        stroke="currentColor"
+                        className="size-6 absolute bottom-2 right-1 cursor-pointer"
+                        onClick={handlePassword}
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          d="M16.5 10.5V6.75a4.5 4.5 0 1 0-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 0 0 2.25-2.25v-6.75a2.25 2.25 0 0 0-2.25-2.25H6.75a2.25 2.25 0 0 0-2.25 2.25v6.75a2.25 2.25 0 0 0 2.25 2.25Z"
+                        />
+                      </svg>
+                    )}
+                  </div>
+                </>
+              )}
               <button
                 type="submit"
                 data-testid="auth-submit-button"

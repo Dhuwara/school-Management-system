@@ -7,7 +7,7 @@ import StudentManagement from '../modules/students/Pages/StudentManagement';
 
 const routes = [
   { path: "/", element: <LandingPage /> },
-  { path: "/login", element: <Login /> },
+  { path: "/login/:role", element: <Login /> },
   {
     path: "/dashboard",
     element: <DashboardLayout />,
