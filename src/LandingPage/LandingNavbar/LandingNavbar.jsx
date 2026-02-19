@@ -41,7 +41,7 @@ const LandingNavbar = () => {
               Login
             </a> */}
             <Link
-              to="/login/admin"
+              to="/login"
               className="bg-[#DC2626] text-white hover:bg-[#B91C1C] px-6 py-2.5 rounded-lg font-semibold transition-all shadow-md hover:shadow-lg"
             >
               Login

@@ -1,11 +1,41 @@
-import React,{useState} from 'react'
-import {  useParams } from "react-router-dom";
+import React, { useState, useContext } from "react";
+import { useParams, useNavigate } from "react-router-dom";
 import { useForm } from 'react-hook-form'
-
+import axios from 'axios';
+import AuthContext from './context/AuthContext';
 const Login = () => {
-  const {role} = useParams()
-  const onSubmit = (data)=>{
-    console.log(data);
+  const { fetchUser } = useContext(AuthContext);
+  const navigate = useNavigate();
+  const { role } = useParams();
+
+  const onSubmit = async (data)=>{  
+    try{
+      axios
+      .post("http://localhost:5000/api/auth/login", data, {
+        withCredentials: true,
+      })
+      const user = await fetchUser()
+      if (!user) return;
+       console.log(user.role);
+      switch (user.role) {
+       
+        case "student":
+          navigate("/dashboard/student");
+          break;
+        case "admin":
+          navigate("/dashboard/admin");
+          break;
+        case "teacher":
+          navigate("/dashboard/teacher");
+          break;
+        default:
+          navigate("/");
+      }
+    }catch(err){
+      console.log(err)
+    }
+    
+      
   }
   const {register,handleSubmit, formState:{errors},} = useForm()
   const [isEye, setIsEye] = useState(false)
@@ -162,24 +192,24 @@ const Login = () => {
                 <>
                   <div>
                     <label
-                      htmlFor="username"
+                      htmlFor="email"
                       className="block text-sm font-medium text-[#0F172A] mb-2"
                     >
-                      Username
+                      Email
                     </label>
                     <input
-                      id="username"
+                      id="email"
                       type="text"
-                      placeholder="Enter username"
+                      placeholder="Enter email"
                       className="w-full h-10 px-3 py-2 border border-slate-200 rounded-lg
                      focus:outline-none focus:ring-2 focus:ring-[#4F46E5]
                      focus:ring-offset-2 transition-all"
-                      {...register("username", {
-                        required: "username is required",
+                      {...register("email", {
+                        required: "email is required",
                       })}
                     />
-                    {errors.username && (
-                      <p className="text-red-400">*Username is required</p>
+                    {errors.email && (
+                      <p className="text-red-400">*email is required</p>
                     )}
                   </div>
 
