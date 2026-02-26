@@ -1,9 +1,13 @@
 import React, { useEffect, useState } from 'react'
 import AddStudent from '../components/AddStudent';
+import ViewStudentModal from '../components/ViewStudentModal';
 import axios from 'axios';
 
 const StudentManagement = () => {
   const [isOpen, setIsOpen] = useState(false)
+  const [studentId, setStudentId] = useState("")
+  const [isModal , setIsModal] = useState(false)
+  const [selectedStudent, setSelectedStudent] = useState(null);
   const handleModal = ()=>{
       setIsOpen(true);
 
@@ -16,7 +20,25 @@ const StudentManagement = () => {
   const formatDate = (dateString) => {
     return new Date(dateString).toLocaleDateString("en-GB");
   };
+const handleEditStudent = (student) => {
+  console.log(student)
+  setSelectedStudent(student);
+  setIsOpen(true);
+};
 
+const handleDelete = async (id) => {
+  const confirmDelete = globalThis.confirm(
+    "Are you sure you want to delete this student?",
+  );
+  if (!confirmDelete) return;
+
+  try {
+    await axios.delete(`http://localhost:5000/api/student/${id}`);
+    setStudents((prev) => prev.filter((student) => student._id !== id));
+  } catch (err) {
+    console.log(err);
+  }
+};
   useEffect(() => {
     const fetchStudents = async () => {
       try {
@@ -31,6 +53,19 @@ const StudentManagement = () => {
 
     fetchStudents();
   }, []);
+
+  const handleViewStudent = (id)=>{
+
+    setStudentId(id)
+    setIsModal(true)
+    
+
+  }
+
+  const closeViewModal = () => {
+    setIsModal(false);
+  };
+  
   return (
     <main className="flex-1 p-6 md:p-8 lg:p-12">
       <div className="max-w-7xl mx-auto w-full space-y-6">
@@ -153,17 +188,43 @@ const StudentManagement = () => {
 
               <tbody className="divide-y divide-gray-200">
                 {students?.map((student) => (
-                  <tr key={student._id}>
-                    <td className="text-center">{student.rollNumber}</td>
+                  <tr
+                    key={student._id}
+                    className="hover:bg-[#FFFBEB] transition-colors"
+                  >
+                    <td className="text-center px-6 py-4 text-sm font-semibold text-[#0F172A]">
+                      {student.rollNumber}
+                    </td>
                     <td className="text-center">{student.name}</td>
                     <td className="text-center">{student.classSection}</td>
                     <td className="text-center">{formatDate(student.dob)}</td>
                     <td className="text-center">
                       {student.parent.contactNumber}
                     </td>
-                    <td className="text-center">{student.status}</td>
+                    <td className="text-center px-6 py-4">
+                      <span className="inline-flex px-3 py-1 text-xs font-semibold rounded-full bg-[#D1FAE5] text-[#065F46]">
+                        {student.status}
+                      </span>
+                    </td>
                     <td className="text-center">
                       <div className="flex justify-center gap-2">
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          width="18"
+                          height="18"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          className="size-5 text-violet-600 cursor-pointer"
+                          aria-hidden="true"
+                          onClick={() => handleViewStudent(student._id)}
+                        >
+                          <path d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0"></path>
+                          <circle cx="12" cy="12" r="3"></circle>
+                        </svg>
                         <svg
                           xmlns="http://www.w3.org/2000/svg"
                           fill="none"
@@ -171,6 +232,7 @@ const StudentManagement = () => {
                           strokeWidth={1.5}
                           stroke="currentColor"
                           className="size-5 text-red-400"
+                          onClick={() => handleDelete(student._id)}
                         >
                           <path
                             strokeLinecap="round"
@@ -185,6 +247,7 @@ const StudentManagement = () => {
                           strokeWidth={1.5}
                           stroke="currentColor"
                           className="size-5 text-blue-500"
+                          onClick={() => handleEditStudent(student)}
                         >
                           <path
                             strokeLinecap="round"
@@ -217,7 +280,17 @@ const StudentManagement = () => {
           </div>
         </div>
       </div>
-      <AddStudent open={isOpen} onClose={closeModal} />
+      <AddStudent
+        open={isOpen}
+        onClose={closeModal}
+        studentData={selectedStudent}
+        setStudents={setStudents}
+      />
+      <ViewStudentModal
+        open={isModal}
+        onClose={closeViewModal}
+        id={studentId}
+      />
     </main>
   );
 }

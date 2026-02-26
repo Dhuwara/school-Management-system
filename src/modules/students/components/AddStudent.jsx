@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -21,7 +21,7 @@ const studentSchema = z.object({
   address: z.string().min(1, "Address is required"),
 });
 
-const AddStudent = ({ open, onClose }) => {
+const AddStudent = ({ open, onClose, studentData, setStudents }) => {
   const {
     register,
     handleSubmit,
@@ -48,30 +48,76 @@ const AddStudent = ({ open, onClose }) => {
     },
   });
 
-  const onSubmit = (data) => {
-    console.log("Validated Data:", data);
-    axios
-      .post("http://localhost:5000/api/student", data)
-      .then((res) => console.log(res))
-      .catch((err) => console.log(err));
-     reset();
-     clearErrors()
-     onClose();
+  useEffect(() => {
+    if (studentData) {
+      console.log(studentData);
+      reset({
+        student: {
+          name: studentData.name,
+          dob: studentData.dob
+            ? new Date(studentData.dob).toISOString().split("T")[0]
+            : "",
+          gender: studentData.gender,
+          rollNumber: studentData.rollNumber,
+          class_section: studentData.classSection,
+          status: studentData.status,
+        },
+        parent: {
+          name: studentData.parent?.name || "",
+          contactNumber: studentData.parent?.contactNumber || "",
+          email: studentData.parent?.email || "",
+        },
+        address: studentData.address || "",
+      });
+    } else {
+      reset();
+    }
+  }, [studentData, reset]);
+
+  const onSubmit = async (data) => {
+    try {
+      if (isEditMode) {
+        const res = await axios.put(
+          `http://localhost:5000/api/student/${studentData._id}`,
+          data,
+        );
+
+        setStudents((prev) =>
+          prev.map((student) =>
+            student._id === studentData._id ? res.data.data : student,
+          ),
+        );
+      } else {
+        const res = await axios.post("http://localhost:5000/api/student", data);
+
+        setStudents((prev) => [...prev, res.data.data]);
+      }
+
+      reset();
+      clearErrors();
+      onClose();
+    } catch (err) {
+      console.log(err);
+    }
   };
 
   if (!open) return null;
-  const handleClose=()=>{
-   reset();
-   clearErrors()
-   onClose();
-  }
+  const handleClose = () => {
+    reset();
+    clearErrors();
+    onClose();
+  };
+  const isEditMode = Boolean(studentData?._id);
+
   return (
     <div
       className={`${open ? "flex" : "hidden"} fixed inset-0 z-50  items-center justify-center bg-black/50 p-4`}
     >
       <div className="w-full max-w-3xl max-h-[90vh] overflow-y-auto rounded-xl bg-white p-6">
         <div className="mb-6 flex items-center justify-between">
-          <h2 className="text-2xl font-bold text-[#0F172A]">Add New Student</h2>
+          <h2 className="text-2xl font-bold text-[#0F172A]">
+            {isEditMode ? "Edit New Student" : "Add New Student"}
+          </h2>
 
           <button
             className="rounded-lg p-2 transition-colors hover:bg-gray-100"
@@ -199,37 +245,43 @@ const AddStudent = ({ open, onClose }) => {
             </h3>
 
             <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-              <input
-                type="text"
-                placeholder="Father/Mother name"
-                className="h-10 w-full rounded-lg border-2 border-[#FCD34D] px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#F59E0B]"
-                {...register("parent.name")}
-              />
-              {errors.parent?.name && (
-                <p className="text-red-500">{errors.parent.name.message}</p>
-              )}
+              <div>
+                <input
+                  type="text"
+                  placeholder="Father/Mother name"
+                  className="h-10 w-full rounded-lg border-2 border-[#FCD34D] px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#F59E0B]"
+                  {...register("parent.name")}
+                />
+                {errors.parent?.name && (
+                  <p className="text-red-500">{errors.parent.name.message}</p>
+                )}
+              </div>
 
-              <input
-                type="tel"
-                placeholder="+91 XXXXX XXXXX"
-                className="h-10 w-full rounded-lg border-2 border-[#FCD34D] px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#F59E0B]"
-                {...register("parent.contactNumber")}
-              />
-              {errors.parent?.contactNumber && (
-                <p className="text-red-500">
-                  {errors.parent.contactNumber.message}
-                </p>
-              )}
+              <div>
+                <input
+                  type="tel"
+                  placeholder="+91 XXXXX XXXXX"
+                  className="h-10 w-full rounded-lg border-2 border-[#FCD34D] px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#F59E0B]"
+                  {...register("parent.contactNumber")}
+                />
+                {errors.parent?.contactNumber && (
+                  <p className="text-red-500">
+                    {errors.parent.contactNumber.message}
+                  </p>
+                )}
+              </div>
 
-              <input
-                type="email"
-                placeholder="parent@example.com"
-                className="h-10 w-full rounded-lg border-2 border-[#FCD34D] px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#F59E0B]"
-                {...register("parent.email")}
-              />
-              {errors.parent?.email && (
-                <p className="text-red-500">{errors.parent.email.message}</p>
-              )}
+              <div>
+                <input
+                  type="email"
+                  placeholder="parent@example.com"
+                  className="h-10 w-full rounded-lg border-2 border-[#FCD34D] px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#F59E0B]"
+                  {...register("parent.email")}
+                />
+                {errors.parent?.email && (
+                  <p className="text-red-500">{errors.parent.email.message}</p>
+                )}
+              </div>
             </div>
           </div>
 
@@ -259,7 +311,7 @@ const AddStudent = ({ open, onClose }) => {
               type="submit"
               className="flex-1 h-10 rounded-lg bg-[#DC2626] font-semibold text-white hover:bg-[#B91C1C]"
             >
-              Add Student
+              {isEditMode ? "Edit Student" : "Add Student"}
             </button>
           </div>
         </form>

@@ -197,6 +197,11 @@ const Login = () => {
                     >
                       Email
                     </label>
+                    {/* <input
+                      type="text"
+                      placeholder="Type here"
+                      className="input"
+                    /> */}
                     <input
                       id="email"
                       type="text"
