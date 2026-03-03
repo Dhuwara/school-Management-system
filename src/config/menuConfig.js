@@ -46,7 +46,7 @@ export const menuItems = [
   },
   {
     label: "Exams",
-    path: "/dashboard/admin/exams",
+    path: "/dashboard/admin/examsettings",
     roles: ["admin"],
     icon: DocumentTextIcon,
   },
@@ -55,24 +55,6 @@ export const menuItems = [
     path: "/dashboard/admin/fees",
     roles: ["admin"],
     icon: CreditCardIcon,
-  },
-  {
-    label: "Library",
-    path: "/dashboard/admin/library",
-    roles: ["admin"],
-    icon: BuildingLibraryIcon,
-  },
-  {
-    label: "Transport",
-    path: "/dashboard/admin/transport",
-    roles: ["admin"],
-    icon: TruckIcon,
-  },
-  {
-    label: "Hostels",
-    path: "/dashboard/admin/hostels",
-    roles: ["admin"],
-    icon: BuildingOffice2Icon,
   },
   {
     label: "Communication",

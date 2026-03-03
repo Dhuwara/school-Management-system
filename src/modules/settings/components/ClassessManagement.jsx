@@ -1,51 +1,58 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import axios from "axios";
 
 const ClassessManagement = () => {
-     const handleSubmit = (e) => {
-       e.preventDefault();
-       console.log(formData, "hitss");
-      
-       axios
-         .post("http://localhost:5000/api/class/configureclass", formData)
-         .then((res) => console.log(res));
-     };
-     const [formData, setFormData] = useState({
-       standard: "",
-       prefix: "",
-       sections: "",
-       numberOfSections: "",
-     });
+  const [formData, setFormData] = useState({
+    prefix: "",
+    standardFormat: "number",
+    sectionFormat: "ABC",
+  });
+  const [isEditing, setIsEditing] = useState(false);
+  const [initialData, setInitialData] = useState(null);
+
+  // Fetch config
+  useEffect(() => {
+    const fetchClassConfig = async () => {
+      try {
+        const res = await axios.get("/api/classconfig/getconfig");
+        if (res.data && res.data.length > 0) {
+          const data = {
+            prefix: res.data[0].prefix || "",
+            standardFormat: res.data[0].standardFormat || "number",
+            sectionFormat: res.data[0].sectionFormat || "ABC",
+          };
+          setFormData(data);
+          setInitialData(data);
+        }
+      } catch (err) {
+        console.error(err);
+      }
+    };
+    fetchClassConfig();
+  }, []);
+
+  const handleSubmit = async (e) => {
+    e.preventDefault(); // Prevent any default submission
+    try {
+      await axios.post("/api/classconfig/upsert", formData);
+      alert("Configuration saved successfully!");
+      setInitialData(formData);
+      setIsEditing(false);
+    } catch (err) {
+      console.error(err);
+      alert("Failed to save configuration");
+    }
+  };
+
+  const handleCancel = () => {
+    if (initialData) setFormData(initialData);
+    setIsEditing(false);
+  };
+
   return (
     <div>
       <form onSubmit={handleSubmit}>
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-          <fieldset className="fieldset">
-            <legend className="fieldset-legend">Class</legend>
-            <select
-              className="select"
-              value={formData.standard}
-              onChange={(e) =>
-                setFormData({ ...formData, standard: e.target.value })
-              }
-            >
-              <option disabled={true}>Pick a Class</option>
-              <option value="LKG">LKG</option>
-              <option value="UKG">UKG</option>
-              <option value="1">1</option>
-              <option value="2">2</option>
-              <option value="3">3</option>
-              <option value="4">4</option>
-              <option value="5">5</option>
-              <option value="6">6</option>
-              <option value="7">7</option>
-              <option value="8">8</option>
-              <option value="9">9</option>
-              <option value="10">10</option>
-              <option value="11">11</option>
-              <option value="12">12</option>
-            </select>
-          </fieldset>
           <fieldset className="fieldset">
             <legend className="fieldset-legend">Prefix</legend>
             <input
@@ -53,43 +60,72 @@ const ClassessManagement = () => {
               className="input"
               placeholder="Type here"
               value={formData.prefix}
+              disabled={!isEditing}
               onChange={(e) =>
                 setFormData({ ...formData, prefix: e.target.value })
               }
             />
           </fieldset>
+
           <fieldset className="fieldset">
-            <legend className="fieldset-legend">Sections</legend>
+            <legend className="fieldset-legend">Standard Format</legend>
             <select
               className="select"
-              value={formData.sections}
+              value={formData.standardFormat}
+              disabled={!isEditing}
               onChange={(e) =>
-                setFormData({ ...formData, sections: e.target.value })
+                setFormData({ ...formData, standardFormat: e.target.value })
+              }
+            >
+              <option value="number">Number</option>
+              <option value="roman">Roman</option>
+            </select>
+          </fieldset>
+
+          <fieldset className="fieldset">
+            <legend className="fieldset-legend">Section Format</legend>
+            <select
+              className="select"
+              value={formData.sectionFormat}
+              disabled={!isEditing}
+              onChange={(e) =>
+                setFormData({ ...formData, sectionFormat: e.target.value })
               }
             >
               <option value="ABC">ABC</option>
-              <option value="123">123</option>
+              <option value="roman">Roman</option>
             </select>
           </fieldset>
-          <fieldset className="fieldset ">
-            <legend className="fieldset-legend">Number Of Sections</legend>
-            <input
-              type="number"
-              className="input"
-              placeholder="Type here"
-              value={formData.numberOfSections}
-              onChange={(e) =>
-                setFormData({ ...formData, numberOfSections: e.target.value })
-              }
-            />
-          </fieldset>
         </div>
-        <div className="flex justify-end">
-          <button className="btn  btn-success">Success</button>
-        </div>
+
+        {isEditing && (
+          <div className="flex justify-end gap-2 mt-4">
+            <button type="submit" className="btn btn-success">
+              Save
+            </button>
+            <button
+              type="button"
+              className="btn btn-secondary"
+              onClick={handleCancel}
+            >
+              Cancel
+            </button>
+          </div>
+        )}
       </form>
+      {!isEditing && (
+        <div className="flex justify-end mb-4">
+          <button
+            type="button"
+            className="btn btn-primary"
+            onClick={() => setIsEditing(true)}
+          >
+            Edit
+          </button>
+        </div>
+      )}
     </div>
   );
-}
+};
 
-export default ClassessManagement
+export default ClassessManagement;

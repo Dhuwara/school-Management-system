@@ -1,17 +1,18 @@
-import React from 'react'
+import React, { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import axios from 'axios';
+import axios from "axios";
 
 const teacherSchema = z.object({
   teacher: z.object({
     firstName: z.string().min(1, "FirstName is required"),
     lastName: z.string().min(1, "Last Name is required"),
-    password:z.string().min(1,"Password is required"),
+    password: z.string().min(1, "Password is required"),
     email: z.string().min(1, "Email is required").email("Invalid email"),
     contactNumber: z.coerce.number().min(1, "Contact number is required"),
     subject: z.string().min(1, "subject is required"),
+    areaOfExpertise: z.string().min(1, "Area of expertise is required"),
     qualification: z.string().min(1, "qualificatio is required"),
     experience: z.coerce.number().min(1, "Experience is required"),
     status: z.string().min(1, "Status is required"),
@@ -20,45 +21,67 @@ const teacherSchema = z.object({
   }),
 });
 
+const AddTeacher = ({ open, onClose }) => {
 
-const AddTeacher = ({open,onClose}) => {
-    const {
-      register,
-      handleSubmit,
-      reset,
-      clearErrors,
-      formState: { errors },
-    } = useForm({
-      resolver: zodResolver(teacherSchema),
-      defaultValues: {
-        teacher: {
-          firstName: "",
-          lastName:"",
-          password:"",
-          email: "",
-          contactNumber: "",
-          subject: "",
-          qualification: "",
-          experience: "",
-          status:"",
-          gender:"",
-          address: "",
-        },
+  const [subjects, setSubjects] = useState([]);
+  useEffect(() => {
+    axios
+      .get("http://localhost:5000/api/subject/getallsubjects")
+      .then((res) => {
+        setSubjects(res.data); // assuming res.data is array
+      })
+      .catch((err) => console.log(err));
+  }, []);
+  const {
+    register,
+    handleSubmit,
+    reset,
+    clearErrors,
+    formState: { errors },
+  } = useForm({
+    resolver: zodResolver(teacherSchema),
+    defaultValues: {
+      teacher: {
+        firstName: "",
+        lastName: "",
+        password: "",
+        email: "",
+        contactNumber: "",
+        subject: "",
+        areaOfExpertise: "",
+        qualification: "",
+        experience: "",
+        status: "",
+        gender: "",
+        address: "",
       },
-    });
-const onSubmit = (data) => {
-  console.log("Validated Data:", data);
-  axios.post("http://localhost:5000/api/staff/addStaff",data).then((res)=>console.log(res)) .catch((err)=> console.log(err))
-   reset();
-   clearErrors();
-   onClose();
-};
+    },
+  });
 
-const handleClose = () => {
-  reset();
-  clearErrors();
-  onClose();
-};
+  const handleClose = () => {
+    reset();
+    clearErrors();
+    onClose();
+  };
+
+  const onSubmit = (data) => {
+    console.log(data,"obsbumitdata")
+    const formattedData = {
+      ...data.teacher,
+      subjects: [data.teacher.areaOfExpertise], // convert string → array
+    };
+     console.log(formattedData, "obsbumitdata");
+    delete formattedData.subject; // remove single subject field
+
+    axios
+      .post("http://localhost:5000/api/staff/addStaff", formattedData)
+      .then((res) => console.log(res))
+      .catch((err) => console.log(err));
+
+    reset();
+    clearErrors();
+    onClose();
+  };
 
   return (
     <div
@@ -118,8 +141,6 @@ const handleClose = () => {
               )}
             </div>
 
-            
-
             <div className="flex flex-col">
               <label className="text-sm font-medium text-[#0F172A] mb-2">
                 Email *
@@ -161,6 +182,29 @@ const handleClose = () => {
               />
               {errors.teacher?.subject && (
                 <p className="text-red-500">{errors.teacher.subject.message}</p>
+              )}
+            </div>
+
+            <div className="flex flex-col">
+              <label className="text-sm font-medium text-[#0F172A] mb-2">
+                Area of Expertise *
+              </label>
+              <select
+                className="h-10 px-3 border-2 border-[#FCD34D] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#F59E0B]"
+                {...register("teacher.areaOfExpertise")}
+              >
+                <option value="">Select Area of Expertise</option>
+
+                {subjects.map((sub) => (
+                  <option key={sub._id} value={sub.subjectCode}>
+                    {sub.subjectName}
+                  </option>
+                ))}
+              </select>
+              {errors.teacher?.areaOfExpertise && (
+                <p className="text-red-500">
+                  {errors.teacher.areaOfExpertise.message}
+                </p>
               )}
             </div>
 
@@ -264,6 +308,6 @@ const handleClose = () => {
       </div>
     </div>
   );
-}
+};
 
-export default AddTeacher
+export default AddTeacher;

@@ -1,7 +1,8 @@
-import React, { useState } from 'react'
+import React from 'react'
 import Settings from '../components/Settings'
 import IdManagement from '../components/IdManagement.jsx'
 import ClassessManagement from '../components/ClassessManagement.jsx'
+import ExamSettings from '../components/ExamSettings.jsx'
 
 const SettingsManagement = () => {
 
@@ -48,10 +49,10 @@ const SettingsManagement = () => {
                 type="radio"
                 name="my_tabs_2"
                 className="tab"
-                aria-label="Tab 3"
+                aria-label="Exam Settings"
               />
               <div className="tab-content border-base-300 bg-base-100 p-10">
-                Tab content 3
+                <ExamSettings />
               </div>
             </div>
           </div>

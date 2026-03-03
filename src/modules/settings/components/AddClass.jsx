@@ -1,59 +1,191 @@
-import { useForm } from "react-hook-form";
+import  { useEffect, useState } from "react";
+import { useForm, Controller } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import axios from 'axios';
+import axios from "axios";
+import { MultiSelect } from "@mantine/core";
 
 const classSchema = z.object({
   className: z.string().min(1, "Class Name is required"),
   section: z.string().min(1, "Section is required"),
   capacity: z.coerce.number().min(1, "Capacity must be at least 1"),
   roomNumber: z.string().min(1, "Room Number is required"),
-  class_teacher: z.string().min(1, "Class Teacher is required"),
+  classTeacher: z
+    .object({
+      _id: z.string().min(1),
+      firstName: z.string().min(1),
+    }),
+  subjects: z.array(z.string()).min(1, "At least one subject is required"),
 });
 
-const AddClass = ({ onOpen, onClose }) => {
-      const {
-        register,
-        handleSubmit,
-        reset,
-        clearErrors,
-        formState: { errors },
-      } = useForm({
-        resolver: zodResolver(classSchema),
-        defaultValues: {
-          className: "",
-          section: "",
-          capacity: "",
-          roomNumber: "",
-          class_teacher: "",
-        },
-      });
+const AddClass = ({ onClose, classData, setTableData }) => {
+  const {
+    register,
+    handleSubmit,
+    reset,
+    clearErrors,
+    formState: { errors },
+    control,
+  } = useForm({
+    resolver: zodResolver(classSchema),
+    defaultValues: {
+      className: "",
+      section: "",
+      capacity: "",
+      roomNumber: "",
+      classTeacher: "",
+      subjects: [],
+    },
+  });
 
-    const onSubmit = (data)=>{
-        axios.post("http://localhost:5000/api/class/configureclass",data)
-         reset();
-         clearErrors();
-         onClose();
+  const [subjectOptions, setSubjectOptions] = useState([]);
+  const [teacherOptions, setTeacherOptions] = useState([]);
+  const [classConfig, setClassConfig] = useState(null);
+
+useEffect(() => {
+  console.log("hitsssfeofef")
+  if (classData) {
+    reset({
+      ...classData,
+      subjects: classData.subjects?.map((s) =>
+        typeof s === "object" ? s._id : s,
+      ),
+    });
+  } else {
+    reset();
+  }
+}, [classData, reset]);
+useEffect(() => {
+  console.log("hitss")
+  const fetchSubjects = async () => {
+    try {
+      const res = await axios.get(
+        "http://localhost:5000/api/subject/getallsubjects",
+      );
+      console.log(res,"resss")
+      const formatted = res.data.map((sub) => ({
+        value: sub.subjectCode,
+        label: sub.subjectName,
+      }));
+      console.log(formatted,"forattee")
+      setSubjectOptions(formatted);
+    } catch (err) {
+      console.log(err);
     }
+  };
+
+  fetchSubjects();
+}, []);
+useEffect(() => {
+  const fetchTeachers = async () => {
+    try {
+      const res = await axios.get(
+        "http://localhost:5000/api/staff/getallstaffs",
+      );
+
+      const formatted = res.data.map((teacher) => ({
+        value: teacher._id,
+        label: teacher.firstName,
+      }));
+      console.log(formatted,"teteefefe");
+      setTeacherOptions(formatted);
+    } catch (err) {
+      console.log(err);
+    }
+  };
+  const fetchClassConfig = async () => {
+    try {
+      const res = await axios.get("/api/classconfig/getconfig");
+      console.log(res,"resss")
+      if (res.data?.length) setClassConfig(res.data[0]);
+    } catch (err) {
+      console.error(err);
+    }
+  };
+  fetchClassConfig()
+  fetchTeachers();
+}, []);
+
+ const getSectionOptions = () => {
+   if (!classConfig) return [];
+
+   const baseClasses = ["LKG", "UKG"];
+   const sections = [];
+   if (classConfig.standardFormat === "number") {
+     for (let i = 1; i <= 12; i++) sections.push(i.toString());
+   } else if (classConfig.standardFormat === "roman") {
+     const romans = [
+       "I",
+       "II",
+       "III",
+       "IV",
+       "V",
+       "VI",
+       "VII",
+       "VIII",
+       "IX",
+       "X",
+       "XI",
+       "XII",
+     ];
+     sections.push(...romans);
+   }
+   return [...baseClasses, ...sections];
+ };
+
+ const isEditMode = Boolean(classData?._id);
+
+ const onSubmit = async (data) => {
+   try {
+     let res;
+     if (isEditMode) {
+       res = await axios.put(`/api/class/updateclass/${classData._id}`, data);
+       setTableData((prev) =>
+         prev.map((item) =>
+           item._id === classData._id ? res.data.data : item,
+         ),
+       );
+     } else {
+       res = await axios.post("/api/class/addclass", data);
+       setTableData((prev) => [...prev, res.data.data]);
+     }
+
+     reset();
+     clearErrors();
+     onClose();
+   } catch (err) {
+     console.log(err);
+   }
+ };
+  
+  
+  useEffect(() => {
+    if (classData) {
+      reset(classData);
+    } else {
+      reset();
+    }
+  }, [classData, reset]);
   return (
-    <dialog className={`modal ${onOpen ? "modal-open" : ""}`}>
+    <dialog className="modal modal-open">
       <div className="modal-box">
         <form className="space-y-4" onSubmit={handleSubmit(onSubmit)}>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="space-y-2 py-3">
-              <label htmlFor="name" className="text-sm font-medium">
+              <label htmlFor="className" className="text-sm font-medium">
                 Class Name *
               </label>
-              <input
-                id="name"
-                type="text"
-                placeholder="e.g., Grade 10"
-                className="flex h-9 w-full rounded-md   bg-transparent px-3 py-1 text-sm shadow-sm transition-colors
-               placeholder:text-muted-foreground
-               focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring
-               disabled:cursor-not-allowed disabled:opacity-50"
+              <select
+                id="className"
+                className="flex h-9 w-full rounded-md bg-transparent px-3 py-1 text-sm shadow-sm"
                 {...register("className")}
-              />
+              >
+                {getSectionOptions().map((cls) => (
+                  <option key={cls} value={cls}>
+                    {cls}
+                  </option>
+                ))}
+              </select>
               {errors.className && (
                 <p className="text-red-500">{errors.className.message}</p>
               )}
@@ -75,6 +207,26 @@ const AddClass = ({ onOpen, onClose }) => {
               />
               {errors.section && (
                 <p className="text-red-500">{errors.section.message}</p>
+              )}
+            </div>
+            <div className="space-y-2 py-3">
+              <Controller
+                name="subjects"
+                control={control}
+                render={({ field }) => (
+                  <MultiSelect
+                    label="Subjects *"
+                    placeholder="Select subjects"
+                    data={subjectOptions}
+                    searchable
+                    value={field.value}
+                    onChange={field.onChange}
+                    styles={{ dropdown: { zIndex: 10000 } }}
+                  />
+                )}
+              />
+              {errors.subjects && (
+                <p className="text-red-500">{errors.subjects.message}</p>
               )}
             </div>
 
@@ -129,19 +281,36 @@ const AddClass = ({ onOpen, onClose }) => {
               <label htmlFor="classTeacher_id" className="text-sm font-medium">
                 Class Teacher
               </label>
-              <select
-                id="classTeacher_id"
-                className="w-full h-9 rounded-md shadow-sm px-3 py-2 text-sm
-                 focus: ring-indigo-400 "
-                {...register("class_teacher")}
-              >
-                <option value="">Select Teacher</option>
-                <option value="teacher_4dcc4fe147e9">Emily Davis</option>
-                <option value="teacher_661fedc97ee7">Michael Brown</option>
-                <option value="teacher_32562c9fd9fa">Sarah Johnson</option>
-              </select>
-              {errors.class_teacher && (
-                <p className="text-red-500">{errors.class_teacher.message}</p>
+              <Controller
+                name="classTeacher"
+                control={control}
+                render={({ field }) => (
+                  <select
+                    className="w-full h-9 rounded-md shadow-sm px-3 py-2 text-sm"
+                    value={field.value?._id || ""}
+                    onChange={(e) => {
+                      const selected = teacherOptions.find(
+                        (t) => t.value === e.target.value,
+                      );
+                      field.onChange(
+                        selected
+                          ? { _id: selected.value, firstName: selected.label }
+                          : null,
+                      );
+                    }}
+                  >
+                    <option value="">Select Teacher</option>
+                    {teacherOptions.map((teacher) => (
+                      <option key={teacher.value} value={teacher.value}>
+                        {teacher.label}
+                      </option>
+                    ))}
+                  </select>
+                )}
+              />
+
+              {errors.classTeacher && (
+                <p className="text-red-500">{errors.classTeacher.message}</p>
               )}
             </div>
           </div>
@@ -169,4 +338,4 @@ const AddClass = ({ onOpen, onClose }) => {
   );
 };
 
-export default AddClass
+export default AddClass;

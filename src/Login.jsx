@@ -19,7 +19,7 @@ const Login = () => {
        console.log(user.role);
       switch (user.role) {
        
-        case "student":
+        case "                                                                    ":
           navigate("/dashboard/student");
           break;
         case "admin":

@@ -1,15 +1,15 @@
+import React, { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import axios from "axios";
-
 
 const subjectsSchema = z.object({
   subjectName: z.string().min(1, "subject Name is required"),
   subjectCode: z.string().min(1, "Code is required"),
   description: z.string().min(1, "Description must be at least 1"),
 });
-const AddSubjects = ({ onOpen, onClose }) => {
+const AddSubjects = ({ onClose, subjectData, setSubjectsData }) => {
   const {
     register,
     handleSubmit,
@@ -21,18 +21,50 @@ const AddSubjects = ({ onOpen, onClose }) => {
     defaultValues: {
       subjectName: "",
       subjectCode: "",
-      description: ""
+      description: "",
     },
   });
-  const onSubmit = (data) => {
-    console.log(data,"datatrta")
-    axios.post("http://localhost:5000/api/subject/addsubject", data);
+
+  const isEditMode = Boolean(subjectData?._id);
+  useEffect(() => {
+    if (subjectData) {
+      reset(subjectData);
+    } else {
+      reset();
+    }
+  }, [subjectData, reset]);
+  const onSubmit = async (data) => {
+    try {
+      if (isEditMode) {
+        const res = await axios.put(
+          `http://localhost:5000/api/subject/updatesubject/${subjectData._id}`,
+          data,
+        );
+        setSubjectsData((prev) =>
+          prev.map((subject) =>
+            subject._id === subjectData._id ? res.data.data : subject,
+          ),
+        );
+
+        console.log(res, "resss");
+      } else {
+        const res = await axios.post(
+          "http://localhost:5000/api/subject/addsubject",
+          data,
+        );
+        console.log(res,"resfata")
+        setSubjectsData((prev) => [...prev, res.data.data]);
+      }
+    } catch (err) {
+      console.log(err);
+    }
+    console.log(data, "datatrta");
     reset();
     clearErrors();
     onClose();
   };
   return (
-    <dialog className={`modal ${onOpen ? "modal-open" : ""}`}>
+    <dialog className="modal modal-open">
       <div className="modal-box">
         <form className="space-y-4" onSubmit={handleSubmit(onSubmit)}>
           <div className="grid grid-cols-1 md:grid-cols-1 gap-3">
@@ -56,7 +88,10 @@ const AddSubjects = ({ onOpen, onClose }) => {
             </div>
 
             <div className="space-y-2 py-3">
-              <label htmlFor="subjectCode " className="text-sm font-medium capitalize">
+              <label
+                htmlFor="subjectCode "
+                className="text-sm font-medium capitalize"
+              >
                 subject Code *
               </label>
               <input
@@ -110,7 +145,7 @@ const AddSubjects = ({ onOpen, onClose }) => {
               type="submit"
               className=" bg-[#4F46E5] text-white hover:bg-[#4338CA] h-10 px-4 py-2 rounded-lg font-medium transition-colors disabled:opacity-50 cursor-pointer"
             >
-              Add Class
+              {isEditMode ? "Edit Subject" : "Add Subject"}
             </button>
           </div>
         </form>

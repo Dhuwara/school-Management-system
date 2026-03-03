@@ -49,9 +49,9 @@ const Contact = () => {
                       viewBox="0 0 24 24"
                       fill="none"
                       stroke="currentColor"
-                      strokewidth="2"
-                      strokeLinejoin-linecap="round"
-                      stroke-linejoin="round"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
                       className="lucide lucide-graduation-cap text-[#DC2626]"
                       aria-hidden="true"
                     >
