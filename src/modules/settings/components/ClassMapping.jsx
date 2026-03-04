@@ -68,7 +68,17 @@ const ClassMapping = () => {
 
     fetchAllData();
   }, []);
+const getClassSubjects = () => {
+  if (!selectedClass || !classes.length || !subjects.length) return [];
 
+  const currentClass = classes.find((cls) => cls._id === selectedClass);
+
+  if (!currentClass?.subjects) return [];
+
+  return subjects.filter((subject) =>
+    currentClass.subjects.includes(subject.subjectCode),
+  );
+};
  const handleClassChange = async (classId) => {
    setSelectedClass(classId);
 
@@ -81,9 +91,14 @@ const ClassMapping = () => {
        `http://localhost:5000/api/classmapping/${classId}/${academicYear}`,
      );
 
-     console.log("Fetched Mapping:", res.data);
-
-     setMappingData(res.data.data);
+     console.log("Fetched Mapping:", res.data.data);
+     const mapping = res.data.data;
+     setMappingData({
+       ...mapping,
+       students: mapping.students
+         ? mapping.students.map((s) => (typeof s === "object" ? s._id : s))
+         : [],
+     });
    } catch (error) {
     console.log(error)
      console.log("No mapping found, initializing empty");
@@ -143,7 +158,7 @@ const getAcademicYear = () => {
     try {
       const payload = {
         classId: selectedClass,
-        academicYear: getAcademicYear(), // 👈 dynamic now
+        academicYear: getAcademicYear(), 
         classTeacher: mappingData?.classTeacher,
         subjectTeachers: mappingData?.subjectTeachers,
         students: mappingData?.students,
@@ -152,7 +167,7 @@ const getAcademicYear = () => {
       console.log("Sending payload:", payload);
 
       await axios.post(
-        "http://localhost:5000/api/classmapping/create",
+        "http://localhost:5000/api/classmapping/save",
         payload,
       );
 
@@ -161,7 +176,7 @@ const getAcademicYear = () => {
       console.error(error);
     }
   };
-
+  
   const getAvailableStudents = () => {
     if (!selectedClass || !students) return [];
 
@@ -173,28 +188,29 @@ const getAcademicYear = () => {
   };
 
   const getAssignedStudents = () => {
-    if (!selectedClass) return [];
+    console.log(mappingData,"mappindata")
+    if (!selectedClass || !mappingData?.students || students.length === 0)
+      return [];
+
+    const selectedSet = new Set(
+      mappingData.students.map((id) => id.toString()),
+    );
 
     return students.filter((student) =>
-      mappingData?.students?.some(
-        (mappedStudent) => mappedStudent._id === student._id,
-      ),
+      selectedSet.has(student._id.toString()),
     );
   };
 
   const getUnassignedStudents = () => {
-    if (!selectedClass) return [];
-    console.log('Selected Class:', selectedClass);
-    console.log('Mapping Data:', JSON.stringify(mappingData, null, 2));
-    console.log('All Students:', students);
-    
-    const assignedStudentIds = mappingData?.students || [];
-    console.log('Assigned Student IDs:', assignedStudentIds);
-    
-    const available = getAvailableStudents().filter(student => !assignedStudentIds.includes(student._id));
-    console.log('Available Students:', available);
-    
-    return available;
+    if (!selectedClass || !mappingData?.students) return [];
+
+    const selectedSet = new Set(
+      mappingData.students.map((id) => id.toString()),
+    );
+
+    return getAvailableStudents().filter(
+      (student) => !selectedSet.has(student._id.toString()),
+    );
   };
 
 
@@ -297,7 +313,7 @@ const getAcademicYear = () => {
               Subject Teachers Assignment
             </h3>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {subjects.map((subject) => (
+              {getClassSubjects().map((subject) => (
                 <div key={subject.subjectCode}>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     {subject.subjectName}
@@ -393,8 +409,9 @@ const getAcademicYear = () => {
                           >
                             <input
                               type="checkbox"
-                              checked={mappingData?.students?.includes(
-                                student._id,
+                              checked={mappingData?.students?.some(
+                                (id) =>
+                                  id.toString() === student._id.toString(),
                               )}
                               onChange={() => handleStudentToggle(student._id)}
                               className="mr-3 h-4 w-4 text-[#4F46E5] border-gray-300 rounded focus:ring-[#4F46E5]"

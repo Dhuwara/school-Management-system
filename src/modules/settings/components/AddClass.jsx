@@ -6,15 +6,14 @@ import axios from "axios";
 import { MultiSelect } from "@mantine/core";
 
 const classSchema = z.object({
-  className: z.string().min(1, "Class Name is required"),
+  standard: z.string().min(1, "standard is required"),
   section: z.string().min(1, "Section is required"),
   capacity: z.coerce.number().min(1, "Capacity must be at least 1"),
   roomNumber: z.string().min(1, "Room Number is required"),
-  classTeacher: z
-    .object({
-      _id: z.string().min(1),
-      firstName: z.string().min(1),
-    }),
+  classTeacher: z.object({
+    _id: z.string().min(1),
+    firstName: z.string().min(1),
+  }),
   subjects: z.array(z.string()).min(1, "At least one subject is required"),
 });
 
@@ -29,7 +28,7 @@ const AddClass = ({ onClose, classData, setTableData }) => {
   } = useForm({
     resolver: zodResolver(classSchema),
     defaultValues: {
-      className: "",
+      standard: "",
       section: "",
       capacity: "",
       roomNumber: "",
@@ -43,7 +42,6 @@ const AddClass = ({ onClose, classData, setTableData }) => {
   const [classConfig, setClassConfig] = useState(null);
 
 useEffect(() => {
-  console.log("hitsssfeofef")
   if (classData) {
     reset({
       ...classData,
@@ -56,18 +54,15 @@ useEffect(() => {
   }
 }, [classData, reset]);
 useEffect(() => {
-  console.log("hitss")
   const fetchSubjects = async () => {
     try {
       const res = await axios.get(
         "http://localhost:5000/api/subject/getallsubjects",
       );
-      console.log(res,"resss")
       const formatted = res.data.map((sub) => ({
         value: sub.subjectCode,
         label: sub.subjectName,
       }));
-      console.log(formatted,"forattee")
       setSubjectOptions(formatted);
     } catch (err) {
       console.log(err);
@@ -85,9 +80,8 @@ useEffect(() => {
 
       const formatted = res.data.map((teacher) => ({
         value: teacher._id,
-        label: teacher.firstName,
+        label: `${teacher.firstName} ${teacher.lastName || ""}`.trim(),
       }));
-      console.log(formatted,"teteefefe");
       setTeacherOptions(formatted);
     } catch (err) {
       console.log(err);
@@ -96,8 +90,7 @@ useEffect(() => {
   const fetchClassConfig = async () => {
     try {
       const res = await axios.get("/api/classconfig/getconfig");
-      console.log(res,"resss")
-      if (res.data?.length) setClassConfig(res.data[0]);
+      if (res.data) setClassConfig(res.data);
     } catch (err) {
       console.error(err);
     }
@@ -107,13 +100,11 @@ useEffect(() => {
 }, []);
 
  const getSectionOptions = () => {
-   if (!classConfig) return [];
-
    const baseClasses = ["LKG", "UKG"];
    const sections = [];
-   if (classConfig.standardFormat === "number") {
+   if (classConfig?.standardFormat === "number") {
      for (let i = 1; i <= 12; i++) sections.push(i.toString());
-   } else if (classConfig.standardFormat === "roman") {
+   } else if (classConfig?.standardFormat === "roman") {
      const romans = [
        "I",
        "II",
@@ -172,13 +163,16 @@ useEffect(() => {
         <form className="space-y-4" onSubmit={handleSubmit(onSubmit)}>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="space-y-2 py-3">
-              <label htmlFor="className" className="text-sm font-medium">
-                Class Name *
+              <label
+                htmlFor="className"
+                className="text-sm font-medium capitalize"
+              >
+                standard *
               </label>
               <select
-                id="className"
+                id="standard"
                 className="flex h-9 w-full rounded-md bg-transparent px-3 py-1 text-sm shadow-sm"
-                {...register("className")}
+                {...register("standard")}
               >
                 {getSectionOptions().map((cls) => (
                   <option key={cls} value={cls}>
@@ -186,8 +180,8 @@ useEffect(() => {
                   </option>
                 ))}
               </select>
-              {errors.className && (
-                <p className="text-red-500">{errors.className.message}</p>
+              {errors.standard && (
+                <p className="text-red-500">{errors.standard.message}</p>
               )}
             </div>
 
@@ -199,7 +193,7 @@ useEffect(() => {
                 id="section"
                 type="text"
                 placeholder="e.g., A"
-                className="flex h-9 w-full rounded-md       bg-transparent px-3 py-1 text-sm shadow-sm transition-colors
+                className="flex h-9 w-full rounded-md  capitalize     bg-transparent px-3 py-1 text-sm shadow-sm transition-colors
                placeholder:text-muted-foreground
                focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring
                disabled:cursor-not-allowed disabled:opacity-50"

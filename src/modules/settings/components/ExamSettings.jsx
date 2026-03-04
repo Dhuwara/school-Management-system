@@ -61,51 +61,71 @@ const ExamSettings = () => {
   };
 
   const handleClassChange = async (classId) => {
-    setSelectedClass(classId);
+     setSelectedClass(classId);
+     setSelectedExamType("");
+     setCurrentSchedule(null);
+
     if (!classId) {
       setExamSchedule([]);
+      setCurrentSchedule(null);
       return;
     }
 
     try {
+      const subjectRes = await axios.get(`/api/class/${classId}/subjects`);
+
+      setSubjects(subjectRes.data.data || []);
+    } catch (err) {
+      console.error(err);
+      setSubjects([]);
+    }
+
+    // Existing exam schedule fetch
+    try {
       const academicYear = getAcademicYear();
       const res = await axios.get(
-        `http://localhost:5000/api/exam/schedule/${classId}/${academicYear}`
+        `/api/exam/schedule/${classId}/${academicYear}`,
       );
       setExamSchedule(res.data.data || []);
     } catch {
-      console.log('No exam schedule found, initializing empty');
       setExamSchedule([]);
     }
   };
 
   const handleExamTypeChange = (examType) => {
+    const examInfo = examTypes.find((t) => t.id === examType);
     setSelectedExamType(examType);
     const existingSchedule = examSchedule.find(s => s.examType === examType);
     if (existingSchedule) {
       setCurrentSchedule(existingSchedule);
+       setEditMode(false);
     } else {
+      console.log(selectedClass,"selectedClass")
       const classInfo = classes.find(c => c._id === selectedClass);
-      const isHighSchool = classInfo && (classInfo.className === '11' || classInfo.className === '12');
-      
+      console.log(classInfo,"classinfoffoof")
+      const isHighSchool =
+        classInfo &&
+        (classInfo.standard === "11" || classInfo.standard === "12");
+      console.log(isHighSchool,"ishighschool")
       setCurrentSchedule({
         examType,
-        examName: examTypes.find(t => t.id === examType)?.name,
+        examName: examInfo?.name,
         academicYear: getAcademicYear(),
-        startDate: '',
-        endDate: '',
-        scheduleType: isHighSchool ? 'section' : 'all',
+        startDate: "",
+        endDate: "",
+        scheduleType: isHighSchool ? "section" : "all",
         sections: isHighSchool ? [classInfo?.section] : [],
-        subjectSchedule: subjects.map(subject => ({
+        subjectSchedule: subjects.map((subject) => ({
           subjectCode: subject.subjectCode,
           subjectName: subject.subjectName,
-          date: '',
-          startTime: '',
-          endTime: '',
-          room: '',
-          maxMarks: examTypes.find(t => t.id === examType)?.maxMarks || 100
-        }))
+          date: "",
+          startTime: "",
+          endTime: "",
+          room: "",
+          mmaxMarks: examInfo?.maxMarks || 100,
+        })),
       });
+       setEditMode(false);
     }
   };
 
@@ -129,20 +149,42 @@ const ExamSettings = () => {
 
   const handleSaveSchedule = async () => {
     try {
+
+      if (!currentSchedule?.startDate || !currentSchedule?.endDate) {
+        alert("Please select start and end dates");
+        return;
+      }
+
+      for (let subject of currentSchedule?.subjectSchedule || []) {
+        if (!subject.date) {
+          alert(`Please set exam date for ${subject.subjectName}`);
+          return;
+        }
+      }
+
       const payload = {
         classId: selectedClass,
-        ...currentSchedule
+        ...currentSchedule,
       };
 
-      await axios.post("http://localhost:5000/api/exam/schedule/create", payload);
-      
-      // Update local state
-      const updatedSchedule = examSchedule.filter(s => s.examType !== currentSchedule.examType);
-      updatedSchedule.push(currentSchedule);
-      setExamSchedule(updatedSchedule);
+      await axios.post(`/api/exam/schedule/save`, payload);
+
+      const academicYear = getAcademicYear();
+
+      const res = await axios.get(
+        `/api/exam/schedule/${selectedClass}/${academicYear}`,
+      );
+
+      setExamSchedule(res.data.data || []);
+
+      const updatedCurrent = res.data.data.find(
+        (s) => s.examType === currentSchedule.examType,
+      );
+
+      setCurrentSchedule(updatedCurrent || null);
       setEditMode(false);
     } catch (error) {
-      console.error('Error saving exam schedule:', error);
+      console.error("Error saving exam schedule:", error);
     }
   };
 
@@ -152,7 +194,7 @@ const ExamSettings = () => {
 
   const isHighSchoolClass = () => {
     const classInfo = getCurrentClassInfo();
-    return classInfo && (classInfo.className === '11' || classInfo.className === '12');
+    return classInfo && (classInfo.standard === '11' || classInfo.standard === '12');
   };
 
   if (loading) {
@@ -209,7 +251,9 @@ const ExamSettings = () => {
               <div className="flex items-end">
                 <button
                   onClick={() => setEditMode(!editMode)}
-                  disabled={!selectedClass || !selectedExamType}
+                  disabled={
+                    !selectedClass || !selectedExamType || !currentSchedule
+                  }
                   className={`px-6 py-2 rounded-lg font-semibold transition-all ${
                     editMode
                       ? "bg-green-500 hover:bg-green-600 text-white"
@@ -238,7 +282,7 @@ const ExamSettings = () => {
                     {editMode ? (
                       <input
                         type="date"
-                        value={currentSchedule.startDate}
+                        value={currentSchedule?.startDate || ""}
                         onChange={(e) =>
                           handleScheduleChange("startDate", e.target.value)
                         }
@@ -279,6 +323,41 @@ const ExamSettings = () => {
                       {isHighSchoolClass() ? "Section-wise" : "All Sections"}
                     </div>
                   </div>
+
+                  {isHighSchoolClass() && (
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        {isHighSchoolClass() ? "Section" : "Sections"}
+                      </label>
+                      {editMode ? (
+                        <input
+                          type="text"
+                          value={
+                            currentSchedule.sections
+                              ? currentSchedule.sections.join(", ")
+                              : ""
+                          }
+                          onChange={(e) => {
+                            const sectionsArray = e.target.value
+                              .split(",")
+                              .map((s) => s.trim());
+                            handleScheduleChange("sections", sectionsArray);
+                          }}
+                          placeholder="e.g. A, B"
+                          className="w-full px-3 py-2 border-2 border-[#FCD34D] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#F59E0B]"
+                        />
+                      ) : (
+                        <div className="px-3 py-2 bg-gray-50 rounded-lg border border-gray-200">
+                          {currentSchedule.sections &&
+                          currentSchedule.sections.length > 0
+                            ? currentSchedule.sections
+                                .filter(Boolean)
+                                .join(", ") || "Not set"
+                            : "Not set"}
+                        </div>
+                      )}
+                    </div>
+                  )}
 
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">

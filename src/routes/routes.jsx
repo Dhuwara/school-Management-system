@@ -8,6 +8,7 @@ import TeacherManagement from '../modules/teachers/Pages/TeacherManagement';
 import Settings from '../modules/settings/Pages/SettingsManagement';
 import Classes from '../modules/settings/components/Classes';
 import ExamSettings from '../modules/settings/components/ExamSettings';
+import AttendanceManagement from '../modules/attendance/Pages/AttendanceManagement';
 import ProtectedRoute from './ProtectedRoute';
 
 import AdminDashboard from '../modules/admin/AdminDashboard';
@@ -30,6 +31,7 @@ const routes = [
               { path: "students", element: <StudentManagement /> },
               { path: "teachers", element: <TeacherManagement /> },
               { path: "classes", element: <Classes /> },
+              { path: "attendance", element: <AttendanceManagement /> },
               { path: "examsettings", element: <ExamSettings /> },
               { path: "settings", element: <Settings /> },
             ],

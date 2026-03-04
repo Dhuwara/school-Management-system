@@ -4,6 +4,7 @@ import AddSubjects from './AddSubjects.jsx';
 import TimetableManagement from './TimetableManagement.jsx';
 import ClassMapping from './ClassMapping.jsx'
 import axios from 'axios';
+import { modals } from "@mantine/modals";
 const Classes = () => {
 
   const [isOpen,setIsOpen] = useState(false)
@@ -78,22 +79,40 @@ const Classes = () => {
      }
   }
 
-  const handleDelete = async (id) => {
-    try {
-      if (activeTab === "classes") {
-        await axios.delete(`http://localhost:5000/api/class/${id}`);
+  const handleDelete = (id) => {
+    console.log(id,"consoleiddd")
+    modals.openConfirmModal({
+      title: "Confirm Delete",
+      centered: true,
+      children: (
+        <p style={{ fontSize: "14px" }}>
+          Are you sure you want to delete this item? This action cannot be
+          undone.
+        </p>
+      ),
+      labels: { confirm: "Delete", cancel: "Cancel" },
+      confirmProps: { color: "red" },
 
-        setTableData((prev) => prev.filter((data) => data._id !== id));
-      }
+      onConfirm: async () => {
+        try {
+          if (activeTab === "classes") {
+            await axios.delete(
+              `http://localhost:5000/api/class/deleteclass/${id}`,
+            );
 
-      if (activeTab === "subjects") {
-        await axios.delete(`http://localhost:5000/api/subjects/${id}`);
+            setTableData((prev) => prev.filter((data) => data._id !== id));
+          }
 
-        setSubjectsData((prev) => prev.filter((data) => data._id !== id));
-      }
-    } catch (error) {
-      console.error("Delete failed:", error);
-    }
+          if (activeTab === "subjects") {
+            await axios.delete(`http://localhost:5000/api/subjects/${id}`);
+
+            setSubjectsData((prev) => prev.filter((data) => data._id !== id));
+          }
+        } catch (error) {
+          console.error("Delete failed:", error);
+        }
+      },
+    });
   };
 
 useEffect(() => {
@@ -216,7 +235,7 @@ useEffect(() => {
                                 viewBox="0 0 24 24"
                                 strokeWidth={1.5}
                                 stroke="currentColor"
-                                className="size-5 text-red-400"
+                                className="size-5 text-red-400 cursor-pointer"
                                 onClick={() => handleDelete(table._id)}
                               >
                                 <path
@@ -305,7 +324,8 @@ useEffect(() => {
                                 viewBox="0 0 24 24"
                                 strokeWidth={1.5}
                                 stroke="currentColor"
-                                className="size-5 text-red-400"
+                                className="size-5 text-red-400 cursor-pointer"
+                                onClick={() => handleDelete(subject._id)}
                               >
                                 <path
                                   strokeLinecap="round"
@@ -319,7 +339,7 @@ useEffect(() => {
                                 viewBox="0 0 24 24"
                                 strokeWidth={1.5}
                                 stroke="currentColor"
-                                className="size-5 text-blue-500"
+                                className="size-5 text-blue-500 cursor-pointer"
                                 onClick={() => handleEditClass(subject)}
                               >
                                 <path

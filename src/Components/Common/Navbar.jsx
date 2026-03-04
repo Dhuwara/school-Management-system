@@ -1,32 +1,48 @@
-import React from 'react'
 
-const Navbar = () => {
+const Navbar = ({ toggleSidebar, isSidebarOpen }) => {
   return (
     <div className="h-16 bg-white/80 backdrop-blur-md border-b border-slate-200 sticky top-0 z-50 px-6 flex items-center justify-between">
       <div className="flex items-center gap-4">
         <button
-          data-testid="mobile-menu-toggle"
           className="lg:hidden p-2 hover:bg-slate-100 rounded-lg transition-colors"
+          onClick={toggleSidebar}
         >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="24"
-            height="24"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            className="lucide lucide-menu"
-            aria-hidden="true"
-          >
-            <path d="M4 5h16"></path>
-            <path d="M4 12h16"></path>
-            <path d="M4 19h16"></path>
-          </svg>
+          {isSidebarOpen ? (
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <path d="M18 6 6 18"></path>
+              <path d="m6 6 12 12"></path>
+            </svg>
+          ) : (
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <path d="M4 5h16"></path>
+              <path d="M4 12h16"></path>
+              <path d="M4 19h16"></path>
+            </svg>
+          )}
         </button>
-        <h1 className="text-2xl font-semibold text-[#4F46E5]">Student Portal</h1>
+        <h1 className="text-2xl font-semibold text-[#4F46E5]">
+          Student Portal
+        </h1>
       </div>
       <div className="flex items-center gap-4">
         <div className="text-right hidden sm:block">
@@ -59,6 +75,6 @@ const Navbar = () => {
       </div>
     </div>
   );
-}
+};
 
 export default Navbar

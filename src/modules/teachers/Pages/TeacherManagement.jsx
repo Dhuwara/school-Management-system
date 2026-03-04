@@ -1,14 +1,42 @@
-import React,{useState} from 'react'
-import AddTeacher from '../components/AddTeacher';
+import React, { useState, useEffect } from "react";
+import axios from "axios";
+import AddTeacher from "../components/AddTeacher";
 
 const TeacherManagement = () => {
-  const [isOpen, setIsOpen] = useState(false)
-  const handleModal = ()=>{
-    setIsOpen(true)
-  }
-  const closeModal = ()=>{
-    setIsOpen(false)
-  }
+  const [isOpen, setIsOpen] = useState(false);
+  const [teachers, setTeachers] = useState([]);
+  const [loading, setLoading] = useState(false);
+  useEffect(() => {
+    const fetchTeachers = async () => {
+      try {
+        setLoading(true);
+
+        const res = await axios.get(
+          "http://localhost:5000/api/staff/getallstaffs",
+          {
+            timeout: 10000,
+            headers: { "Cache-Control": "no-cache" },
+          },
+        );
+        console.log(res,"reserroee")
+        setTeachers(res.data.data || res.data);
+        // depends on how your backend sends response
+      } catch (error) {
+        console.error("Failed to fetch teachers:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchTeachers();
+  }, []);
+
+  const handleModal = () => {
+    setIsOpen(true);
+  };
+  const closeModal = () => {
+    setIsOpen(false);
+  };
   return (
     <main className="flex-1 p-6 md:p-8 lg:p-12">
       <div className="max-w-7xl mx-auto w-full">
@@ -66,7 +94,7 @@ const TeacherManagement = () => {
                 <circle cx="9" cy="7" r="4"></circle>
               </svg>
               <p className="text-sm text-[#64748B]">Total Teachers</p>
-              <p className="text-3xl font-bold text-[#0F172A]">5</p>
+              <p className="text-3xl font-bold text-[#0F172A]">{teachers.length}</p>
             </div>
             <div className="p-6 rounded-xl border-2 border-[#FCD34D] bg-gradient-to-br from-[#FEE2E2] to-white">
               <svg
@@ -140,438 +168,122 @@ const TeacherManagement = () => {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-200">
-                  <tr className="hover:bg-[#FFFBEB] transition-colors">
-                    <td className="px-6 py-4 text-sm font-semibold text-[#0F172A]">
-                      T001
-                    </td>
-                    <td className="px-6 py-4 text-sm font-medium text-[#0F172A]">
-                      Mrs. Sarah Johnson
-                    </td>
-                    <td className="px-6 py-4 text-sm text-[#64748B]">
-                      Mathematics
-                    </td>
-                    <td className="px-6 py-4 text-sm text-[#64748B]">
-                      <span className="inline-block bg-[#FEF3C7] px-2 py-1 rounded text-xs mr-1 mb-1">
-                        Grade 5-A
-                      </span>
-                      <span className="inline-block bg-[#FEF3C7] px-2 py-1 rounded text-xs mr-1 mb-1">
-                        Grade 4-B
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 text-sm">
-                      <span className="inline-flex px-2 py-1 bg-[#D1FAE5] text-[#065F46] rounded-full text-xs font-semibold">
-                        30 hrs
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 text-sm text-[#64748B]">
-                      +91 9876543210
-                    </td>
-                    <td className="px-6 py-4">
-                      <div className="flex items-center gap-2">
-                        <button className="p-2 text-[#4F46E5] hover:bg-[#EEF2FF] rounded-lg transition-colors">
-                          <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            width="18"
-                            height="18"
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            stroke="currentColor"
-                            strokeWidth="2"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            className="lucide lucide-eye"
-                            aria-hidden="true"
-                          >
-                            <path d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0"></path>
-                            <circle cx="12" cy="12" r="3"></circle>
-                          </svg>
-                        </button>
-                        <button className="p-2 text-[#F59E0B] hover:bg-[#FEF3C7] rounded-lg transition-colors">
-                          <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            width="18"
-                            height="18"
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            stroke="currentColor"
-                            strokeWidth="2"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            className="lucide lucide-square-pen"
-                            aria-hidden="true"
-                          >
-                            <path d="M12 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
-                            <path d="M18.375 2.625a1 1 0 0 1 3 3l-9.013 9.014a2 2 0 0 1-.853.505l-2.873.84a.5.5 0 0 1-.62-.62l.84-2.873a2 2 0 0 1 .506-.852z"></path>
-                          </svg>
-                        </button>
-                        <button className="p-2 text-[#DC2626] hover:bg-[#FEE2E2] rounded-lg transition-colors">
-                          <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            width="18"
-                            height="18"
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            stroke="currentColor"
-                            strokeWidth="2"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            className="lucide lucide-trash2 lucide-trash-2"
-                            aria-hidden="true"
-                          >
-                            <path d="M10 11v6"></path>
-                            <path d="M14 11v6"></path>
-                            <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"></path>
-                            <path d="M3 6h18"></path>
-                            <path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
-                          </svg>
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                  <tr className="hover:bg-[#FFFBEB] transition-colors">
-                    <td className="px-6 py-4 text-sm font-semibold text-[#0F172A]">
-                      T002
-                    </td>
-                    <td className="px-6 py-4 text-sm font-medium text-[#0F172A]">
-                      Mr. John Smith
-                    </td>
-                    <td className="px-6 py-4 text-sm text-[#64748B]">
-                      Science
-                    </td>
-                    <td className="px-6 py-4 text-sm text-[#64748B]">
-                      <span className="inline-block bg-[#FEF3C7] px-2 py-1 rounded text-xs mr-1 mb-1">
-                        Grade 6-A
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 text-sm">
-                      <span className="inline-flex px-2 py-1 bg-[#D1FAE5] text-[#065F46] rounded-full text-xs font-semibold">
-                        25 hrs
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 text-sm text-[#64748B]">
-                      +91 9876543211
-                    </td>
-                    <td className="px-6 py-4">
-                      <div className="flex items-center gap-2">
-                        <button className="p-2 text-[#4F46E5] hover:bg-[#EEF2FF] rounded-lg transition-colors">
-                          <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            width="18"
-                            height="18"
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            stroke="currentColor"
-                            strokeWidth="2"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            className="lucide lucide-eye"
-                            aria-hidden="true"
-                          >
-                            <path d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0"></path>
-                            <circle cx="12" cy="12" r="3"></circle>
-                          </svg>
-                        </button>
-                        <button className="p-2 text-[#F59E0B] hover:bg-[#FEF3C7] rounded-lg transition-colors">
-                          <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            width="18"
-                            height="18"
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            stroke="currentColor"
-                            strokeWidth="2"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            className="lucide lucide-square-pen"
-                            aria-hidden="true"
-                          >
-                            <path d="M12 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
-                            <path d="M18.375 2.625a1 1 0 0 1 3 3l-9.013 9.014a2 2 0 0 1-.853.505l-2.873.84a.5.5 0 0 1-.62-.62l.84-2.873a2 2 0 0 1 .506-.852z"></path>
-                          </svg>
-                        </button>
-                        <button className="p-2 text-[#DC2626] hover:bg-[#FEE2E2] rounded-lg transition-colors">
-                          <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            width="18"
-                            height="18"
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            stroke="currentColor"
-                            strokeWidth="2"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            className="lucide lucide-trash2 lucide-trash-2"
-                            aria-hidden="true"
-                          >
-                            <path d="M10 11v6"></path>
-                            <path d="M14 11v6"></path>
-                            <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"></path>
-                            <path d="M3 6h18"></path>
-                            <path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
-                          </svg>
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                  <tr className="hover:bg-[#FFFBEB] transition-colors">
-                    <td className="px-6 py-4 text-sm font-semibold text-[#0F172A]">
-                      T003
-                    </td>
-                    <td className="px-6 py-4 text-sm font-medium text-[#0F172A]">
-                      Ms. Emily Davis
-                    </td>
-                    <td className="px-6 py-4 text-sm text-[#64748B]">
-                      English
-                    </td>
-                    <td className="px-6 py-4 text-sm text-[#64748B]">
-                      <span className="inline-block bg-[#FEF3C7] px-2 py-1 rounded text-xs mr-1 mb-1">
-                        Grade 7-A
-                      </span>
-                      <span className="inline-block bg-[#FEF3C7] px-2 py-1 rounded text-xs mr-1 mb-1">
-                        Grade 6-B
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 text-sm">
-                      <span className="inline-flex px-2 py-1 bg-[#D1FAE5] text-[#065F46] rounded-full text-xs font-semibold">
-                        28 hrs
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 text-sm text-[#64748B]">
-                      +91 9876543212
-                    </td>
-                    <td className="px-6 py-4">
-                      <div className="flex items-center gap-2">
-                        <button className="p-2 text-[#4F46E5] hover:bg-[#EEF2FF] rounded-lg transition-colors">
-                          <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            width="18"
-                            height="18"
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            stroke="currentColor"
-                            strokeWidth="2"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            className="lucide lucide-eye"
-                            aria-hidden="true"
-                          >
-                            <path d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0"></path>
-                            <circle cx="12" cy="12" r="3"></circle>
-                          </svg>
-                        </button>
-                        <button className="p-2 text-[#F59E0B] hover:bg-[#FEF3C7] rounded-lg transition-colors">
-                          <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            width="18"
-                            height="18"
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            stroke="currentColor"
-                            strokeWidth="2"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            className="lucide lucide-square-pen"
-                            aria-hidden="true"
-                          >
-                            <path d="M12 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
-                            <path d="M18.375 2.625a1 1 0 0 1 3 3l-9.013 9.014a2 2 0 0 1-.853.505l-2.873.84a.5.5 0 0 1-.62-.62l.84-2.873a2 2 0 0 1 .506-.852z"></path>
-                          </svg>
-                        </button>
-                        <button className="p-2 text-[#DC2626] hover:bg-[#FEE2E2] rounded-lg transition-colors">
-                          <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            width="18"
-                            height="18"
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            stroke="currentColor"
-                            strokeWidth="2"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            className="lucide lucide-trash2 lucide-trash-2"
-                            aria-hidden="true"
-                          >
-                            <path d="M10 11v6"></path>
-                            <path d="M14 11v6"></path>
-                            <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"></path>
-                            <path d="M3 6h18"></path>
-                            <path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
-                          </svg>
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                  <tr className="hover:bg-[#FFFBEB] transition-colors">
-                    <td className="px-6 py-4 text-sm font-semibold text-[#0F172A]">
-                      T004
-                    </td>
-                    <td className="px-6 py-4 text-sm font-medium text-[#0F172A]">
-                      Mr. Michael Brown
-                    </td>
-                    <td className="px-6 py-4 text-sm text-[#64748B]">
-                      Social Studies
-                    </td>
-                    <td className="px-6 py-4 text-sm text-[#64748B]">
-                      <span className="inline-block bg-[#FEF3C7] px-2 py-1 rounded text-xs mr-1 mb-1">
-                        Grade 5-B
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 text-sm">
-                      <span className="inline-flex px-2 py-1 bg-[#D1FAE5] text-[#065F46] rounded-full text-xs font-semibold">
-                        22 hrs
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 text-sm text-[#64748B]">
-                      +91 9876543213
-                    </td>
-                    <td className="px-6 py-4">
-                      <div className="flex items-center gap-2">
-                        <button className="p-2 text-[#4F46E5] hover:bg-[#EEF2FF] rounded-lg transition-colors">
-                          <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            width="18"
-                            height="18"
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            stroke="currentColor"
-                            strokeWidth="2"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            className="lucide lucide-eye"
-                            aria-hidden="true"
-                          >
-                            <path d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0"></path>
-                            <circle cx="12" cy="12" r="3"></circle>
-                          </svg>
-                        </button>
-                        <button className="p-2 text-[#F59E0B] hover:bg-[#FEF3C7] rounded-lg transition-colors">
-                          <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            width="18"
-                            height="18"
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            stroke="currentColor"
-                            strokeWidth="2"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            className="lucide lucide-square-pen"
-                            aria-hidden="true"
-                          >
-                            <path d="M12 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
-                            <path d="M18.375 2.625a1 1 0 0 1 3 3l-9.013 9.014a2 2 0 0 1-.853.505l-2.873.84a.5.5 0 0 1-.62-.62l.84-2.873a2 2 0 0 1 .506-.852z"></path>
-                          </svg>
-                        </button>
-                        <button className="p-2 text-[#DC2626] hover:bg-[#FEE2E2] rounded-lg transition-colors">
-                          <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            width="18"
-                            height="18"
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            stroke="currentColor"
-                            strokeWidth="2"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            className="lucide lucide-trash2 lucide-trash-2"
-                            aria-hidden="true"
-                          >
-                            <path d="M10 11v6"></path>
-                            <path d="M14 11v6"></path>
-                            <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"></path>
-                            <path d="M3 6h18"></path>
-                            <path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
-                          </svg>
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                  <tr className="hover:bg-[#FFFBEB] transition-colors">
-                    <td className="px-6 py-4 text-sm font-semibold text-[#0F172A]">
-                      T005
-                    </td>
-                    <td className="px-6 py-4 text-sm font-medium text-[#0F172A]">
-                      Mrs. Jessica Wilson
-                    </td>
-                    <td className="px-6 py-4 text-sm text-[#64748B]">Hindi</td>
-                    <td className="px-6 py-4 text-sm text-[#64748B]">
-                      <span className="inline-block bg-[#FEF3C7] px-2 py-1 rounded text-xs mr-1 mb-1">
-                        Grade 4-A
-                      </span>
-                      <span className="inline-block bg-[#FEF3C7] px-2 py-1 rounded text-xs mr-1 mb-1">
-                        Grade 5-A
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 text-sm">
-                      <span className="inline-flex px-2 py-1 bg-[#D1FAE5] text-[#065F46] rounded-full text-xs font-semibold">
-                        26 hrs
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 text-sm text-[#64748B]">
-                      +91 9876543214
-                    </td>
-                    <td className="px-6 py-4">
-                      <div className="flex items-center gap-2">
-                        <button className="p-2 text-[#4F46E5] hover:bg-[#EEF2FF] rounded-lg transition-colors">
-                          <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            width="18"
-                            height="18"
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            stroke="currentColor"
-                            strokeWidth="2"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            className="lucide lucide-eye"
-                            aria-hidden="true"
-                          >
-                            <path d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0"></path>
-                            <circle cx="12" cy="12" r="3"></circle>
-                          </svg>
-                        </button>
-                        <button className="p-2 text-[#F59E0B] hover:bg-[#FEF3C7] rounded-lg transition-colors">
-                          <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            width="18"
-                            height="18"
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            stroke="currentColor"
-                            strokeWidth="2"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            className="lucide lucide-square-pen"
-                            aria-hidden="true"
-                          >
-                            <path d="M12 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
-                            <path d="M18.375 2.625a1 1 0 0 1 3 3l-9.013 9.014a2 2 0 0 1-.853.505l-2.873.84a.5.5 0 0 1-.62-.62l.84-2.873a2 2 0 0 1 .506-.852z"></path>
-                          </svg>
-                        </button>
-                        <button className="p-2 text-[#DC2626] hover:bg-[#FEE2E2] rounded-lg transition-colors">
-                          <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            width="18"
-                            height="18"
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            stroke="currentColor"
-                            strokeWidth="2"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            className="lucide lucide-trash2 lucide-trash-2"
-                            aria-hidden="true"
-                          >
-                            <path d="M10 11v6"></path>
-                            <path d="M14 11v6"></path>
-                            <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"></path>
-                            <path d="M3 6h18"></path>
-                            <path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
-                          </svg>
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
+                  {loading ? (
+                    <tr>
+                      <td colSpan="7" className="text-center py-6">
+                        Loading...
+                      </td>
+                    </tr>
+                  ) : teachers.length === 0 ? (
+                    <tr>
+                      <td colSpan="7" className="text-center py-6">
+                        No teachers found
+                      </td>
+                    </tr>
+                  ) : (
+                    teachers.map((teacher) => (
+                      <tr
+                        key={teacher._id}
+                        className="hover:bg-[#FFFBEB] transition-colors"
+                      >
+                        <td className="px-6 py-4 text-sm font-semibold text-[#0F172A]">
+                          {teacher.employeeId}
+                        </td>
+
+                        <td className="px-6 py-4 text-sm font-medium text-[#0F172A]">
+                          {teacher.firstName} {teacher.lastName}
+                        </td>
+
+                        <td className="px-6 py-4 text-sm text-[#64748B]">
+                          {teacher.subjects?.join(", ")}
+                        </td>
+
+                        <td className="px-6 py-4 text-sm text-[#64748B]">
+                          {teacher.assignedClass?.className || "-"}
+                        </td>
+
+                        <td className="px-6 py-4 text-sm">
+                          <span className="inline-flex px-2 py-1 bg-[#D1FAE5] text-[#065F46] rounded-full text-xs font-semibold">
+                            {teacher.workload || 0} hrs
+                          </span>
+                        </td>
+
+                        <td className="px-6 py-4 text-sm text-[#64748B]">
+                          {teacher.contactNumber}
+                        </td>
+
+                        <td className="px-6 py-4">
+                          {" "}
+                          <div className="flex items-center gap-2">
+                            {" "}
+                            <button className="p-2 text-[#4F46E5] hover:bg-[#EEF2FF] rounded-lg transition-colors">
+                              {" "}
+                              <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                width="18"
+                                height="18"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                strokeWidth="2"
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                className="lucide lucide-eye"
+                                aria-hidden="true"
+                              >
+                                {" "}
+                                <path d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0"></path>{" "}
+                                <circle cx="12" cy="12" r="3"></circle>{" "}
+                              </svg>{" "}
+                            </button>{" "}
+                            <button className="p-2 text-[#F59E0B] hover:bg-[#FEF3C7] rounded-lg transition-colors">
+                              {" "}
+                              <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                width="18"
+                                height="18"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                strokeWidth="2"
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                className="lucide lucide-square-pen"
+                                aria-hidden="true"
+                              >
+                                {" "}
+                                <path d="M12 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>{" "}
+                                <path d="M18.375 2.625a1 1 0 0 1 3 3l-9.013 9.014a2 2 0 0 1-.853.505l-2.873.84a.5.5 0 0 1-.62-.62l.84-2.873a2 2 0 0 1 .506-.852z"></path>{" "}
+                              </svg>{" "}
+                            </button>{" "}
+                            <button className="p-2 text-[#DC2626] hover:bg-[#FEE2E2] rounded-lg transition-colors">
+                              {" "}
+                              <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                width="18"
+                                height="18"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                strokeWidth="2"
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                className="lucide lucide-trash2 lucide-trash-2"
+                                aria-hidden="true"
+                              >
+                                {" "}
+                                <path d="M10 11v6"></path>{" "}
+                                <path d="M14 11v6"></path>{" "}
+                                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"></path>{" "}
+                                <path d="M3 6h18"></path>{" "}
+                                <path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>{" "}
+                              </svg>{" "}
+                            </button>{" "}
+                          </div>{" "}
+                        </td>
+                      </tr>
+                    ))
+                  )}
                 </tbody>
               </table>
             </div>
@@ -581,6 +293,6 @@ const TeacherManagement = () => {
       <AddTeacher open={isOpen} onClose={closeModal} />
     </main>
   );
-}
+};
 
-export default TeacherManagement
+export default TeacherManagement;

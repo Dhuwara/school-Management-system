@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import { menuItems } from "../../config/menuConfig";
 import { useAuth } from "../../context/AuthContext";
 
-const Sidebar = () => {
+const Sidebar = ({ isOpen }) => {
   const { user } = useAuth();
 
   const filteredMenu = menuItems.filter((item) => {
@@ -11,10 +11,15 @@ const Sidebar = () => {
   });
   return (
     <aside
-      className="
-              fixed lg:sticky top-16 left-0 h-[calc(100vh-4rem)] w-64 bg-white border-r border-slate-200 p-4 flex flex-col gap-2 z-40 transition-transform duration-300
-              -translate-x-full lg:translate-x-0
-            "
+      className={`
+        fixed lg:sticky top-16 left-0
+        h-[calc(100vh-4rem)] w-64
+        bg-white border-r border-slate-200 p-4
+        flex flex-col gap-2 z-40
+        transition-transform duration-300
+        ${isOpen ? "translate-x-0" : "-translate-x-full"}
+        lg:translate-x-0
+      `}
     >
       {filteredMenu.map((item, index) => {
         const Icon = item.icon;
